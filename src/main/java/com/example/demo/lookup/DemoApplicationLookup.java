@@ -10,9 +10,6 @@ public class DemoApplicationLookup {
 	public static void main(String[] args) {
 		ApplicationContext context = SpringApplication.run(DemoApplicationLookup.class, args);
 
-		SingletonBean1 singletonBean = context.getBean(SingletonBean1.class);
-		singletonBean.usePrototype();
-		singletonBean.usePrototype();
 	}
 
 }

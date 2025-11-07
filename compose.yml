@@ -13,8 +13,5 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./init:/docker-entrypoint-initdb.d  # <-- Mount SQL scripts here /// docker compose down -v will help
 
-
-
 volumes:
   postgres_data:
-  mysql56-data:
