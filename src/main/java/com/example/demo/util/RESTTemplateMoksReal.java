@@ -6,21 +6,37 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import com.example.demo.mocks.MockServlet;
 import com.example.demo.service.NBUParser;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RESTTemplateMoksReal {
+public class RESTTemplateMoksReal implements ApplicationContextAware {
+
+    private static ApplicationContext context;
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) {
+        RESTTemplateMoksReal.context = applicationContext;
+    }
+
+    public static ApplicationContext getContext() {
+        return context;
+    }
     private static ClassLoaderForMocks classLoaderForMocks = new ClassLoaderForMocks();
     private static final Logger logger = Logger.getLogger("Template");
     private static NBUParser parser;
+    @Autowired
+    ApplicationContext ac;
 
     public RESTTemplateMoksReal(NBUParser parser) {
         this.parser = parser;
     }
 
-    public static byte[] doGet(String uri, Map<String, String> prs) {
+    public byte[] doGet(String uri, Map<String, String> prs) {
         try {
-            MockServlet mockInstance = getMockInstance(uri);
+            MockServlet mockInstance = getMockInstance(uri, ac);
             if (mockInstance == null) {
                 String code = prs.get("CODE");
                 byte[] bytes = parser.findData(code).toString().getBytes();
@@ -37,13 +53,17 @@ public class RESTTemplateMoksReal {
         return new byte[1];
     }
 
-    private static MockServlet getMockInstance(String uri) {
+    private MockServlet getMockInstance(String uri, ApplicationContext ctx) {
         if (uri.startsWith("mock://")) {
             try {
                 String mockClassName = uri.substring(7);
-                MockServlet mockInstance = (MockServlet) classLoaderForMocks.loadClass(mockClassName)
-                        .getDeclaredConstructor().newInstance();
-                return mockInstance;
+                Class<?> clazz = classLoaderForMocks.loadClass(mockClassName);
+                Object instance = clazz.getDeclaredConstructor().newInstance();
+
+                // 🧩 Inject dependencies managed by Spring
+                ctx.getAutowireCapableBeanFactory().autowireBean(instance);
+
+                return (MockServlet) instance;
             } catch (Exception ex) {
                 throw new RuntimeException("Failed to create mock instance", ex);
             }
@@ -51,4 +71,5 @@ public class RESTTemplateMoksReal {
             return null;
         }
     }
+
 }

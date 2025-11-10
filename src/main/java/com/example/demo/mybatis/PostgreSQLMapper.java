@@ -1,6 +1,9 @@
 package com.example.demo.mybatis;
 
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
 public interface PostgreSQLMapper {
-    //SELECT body FROM testdb.financedata WHERE param = ?
+
     String getBodyByCode(String code);
 }

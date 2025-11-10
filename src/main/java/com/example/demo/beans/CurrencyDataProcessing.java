@@ -10,12 +10,17 @@ import org.springframework.stereotype.Service;
 @Service
 public class CurrencyDataProcessing {
 
+    RESTTemplateMoksReal templateMoksReal;
+
+    public CurrencyDataProcessing(RESTTemplateMoksReal templateMoksReal) {
+        this.templateMoksReal = templateMoksReal;
+    }
 
     public JSONObject getCurInfoFromUNB(String code, String url) {
 
         Map<String, String> map = new HashMap<>();
         map.put("CODE", code);
-        byte[] bytes = RESTTemplateMoksReal.doGet(url, map);
+        byte[] bytes = templateMoksReal.doGet(url, map);
         JSONObject obj = new JSONObject(new String(bytes, StandardCharsets.UTF_8));
         return obj;
     }
